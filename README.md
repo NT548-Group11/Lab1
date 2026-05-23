@@ -96,7 +96,6 @@ Terraform/
 | `ami` | _(tự động)_ | Để trống để tự resolve Ubuntu Server 24.04 LTS mới nhất |
 | `instance_type` | `t3.micro` | Loại EC2 instance |
 
-> **Bảo mật:** Đổi `ssh_allowed_cidr` thành IP của bạn (ví dụ `1.2.3.4/32`) trong môi trường thực tế.
 
 ### Các bước chạy Terraform
 
@@ -137,7 +136,7 @@ ssh -i NT548-Lab-key.pem ubuntu@<public_ec2_ip>
 ssh -i NT548-Lab-key.pem -o "ProxyCommand=ssh -i NT548-Lab-key.pem -W %h:%p ubuntu@<public_ec2_ip>" ubuntu@<private_ec2_private_ip>
 ```
 
-### Dọn dẹp tài nguyên (tránh phát sinh chi phí)
+### Dọn dẹp tài nguyên 
 
 ```bash
 terraform destroy
@@ -157,7 +156,7 @@ CloudFormation/
 └── 03-ec2.yaml              # EC2 Instances
 ```
 
-> **Lưu ý về thiết kế module:** CloudFormation không có cơ chế "module" như Terraform. Thay vào đó, dự án sử dụng **3 stack riêng biệt** kết nối với nhau qua `Outputs` / `!ImportValue`. Stack sau import giá trị từ stack trước (VPC ID, Subnet ID, Security Group ID). Đây là phương pháp tiêu chuẩn để tổ chức CloudFormation theo dạng module.
+> **3 stack riêng biệt** kết nối với nhau qua `Outputs` / `!ImportValue`. Stack sau import giá trị từ stack trước (VPC ID, Subnet ID, Security Group ID). Đây là phương pháp tiêu chuẩn để tổ chức CloudFormation theo dạng module.
 
 ### Yêu cầu trước khi chạy
 
@@ -262,17 +261,3 @@ aws cloudformation delete-stack --stack-name NT548-Lab1-Cloudformation-security-
 # Bước 3: Xóa VPC stack
 aws cloudformation delete-stack --stack-name NT548-Lab1-Cloudformation-vpc --region ap-southeast-1
 ```
-
-> **Lưu ý:** Chờ mỗi stack xóa hoàn toàn trước khi xóa stack tiếp theo. Nếu stack đã xóa xong, lệnh `describe-stacks` sẽ báo lỗi `Stack does not exist` — đó là bình thường.
-
----
-
-## Chi phí ước tính
-
-| Resource | Chi phí |
-|----------|---------|
-| NAT Gateway | ~$0.045/giờ + $0.045/GB data |
-| EC2 t3.micro | ~$0.0104/giờ |
-| Elastic IP | Miễn phí khi đang dùng |
-
-> **Quan trọng:** NAT Gateway phát sinh chi phí theo giờ. Hãy chạy `terraform destroy` hoặc xóa CloudFormation stacks khi không sử dụng.
